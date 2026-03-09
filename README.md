@@ -33,5 +33,5 @@ Open `Rag_Project_NoteBook.ipynb` and run the cells in order. Put your PDFs in a
 To run only the app after ingestion (from project root):
 
 ```
-python -m src.app
+python app.py
 ```
