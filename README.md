@@ -14,9 +14,9 @@ RAG project that loads PDFs into a vector store and answers questions using Gemi
 ## Setup
 
 1. Install dependencies:
-   ```
+```
    pip install -r requirements.txt
-   ```
+```
 2. Set your Google API key:
 
 ```
