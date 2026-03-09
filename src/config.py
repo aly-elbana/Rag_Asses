@@ -7,11 +7,14 @@ try:
 except Exception:
     pass
 
-BASE_DIR = Path.cwd()
-KNOWLEDGE_BASE = str(BASE_DIR / "Untitled Folder")
+# Project root (parent of src/) so paths work when running "python src/app.py" from repo root
+BASE_DIR = Path(__file__).resolve().parent.parent
+KNOWLEDGE_BASE = str(BASE_DIR / "PDFs")
+# print(KNOWLEDGE_BASE)
+# os.listdir(KNOWLEDGE_BASE)
 DB_NAME = str(BASE_DIR / "vector_db")
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
-LLM_MODEL = "gemini-2.0-flash"
+LLM_MODEL = "gemini-2.5-flash"
 RETRIEVAL_K = 10
 CHUNK_SIZE = 700
 CHUNK_OVERLAP = 100

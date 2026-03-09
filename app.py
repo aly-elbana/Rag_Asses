@@ -1,5 +1,18 @@
-import gradio as gr
+import sys
 from pathlib import Path
+
+# Ensure project root is on path so "python src/app.py" works from repo root
+_project_root = Path(__file__).resolve().parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+# Build chunks and vector DB on every run (before loading RAG)
+print("Building knowledge base (chunking PDFs and creating embeddings)...")
+from src.ingestion import run_ingestion
+run_ingestion()
+print("Ready. Launching interface...")
+
+import gradio as gr
 
 from src.rag import answer_question
 
@@ -30,16 +43,23 @@ def _format_history(history):
 
 
 def chat_wrapper(message, history):
-    formatted_history = _format_history(history)
-    answer, docs = answer_question(message, formatted_history)
-    unique_sources = set()
-    for doc in docs:
-        source_name = doc.metadata.get("source", "Unknown Document")
-        unique_sources.add(Path(str(source_name)).name)
-    source_list = "\n\n---\n**Sources used:**"
-    for s in unique_sources:
-        source_list += f"\n- {s}"
-    return f"{answer}{source_list}"
+    if not message or not str(message).strip():
+        return ""
+    try:
+        formatted_history = _format_history(history)
+        answer, docs = answer_question(message, formatted_history)
+        if answer is None:
+            return "Error: The model returned no response. Check GOOGLE_API_KEY in .env"
+        unique_sources = set()
+        for doc in docs:
+            source_name = doc.metadata.get("source", "Unknown Document")
+            unique_sources.add(Path(str(source_name)).name)
+        source_list = "\n\n---\n**Sources used:**"
+        for s in unique_sources:
+            source_list += f"\n- {s}"
+        return f"{answer}{source_list}"
+    except Exception as e:
+        return f"Error: {e}\n\nMake sure GOOGLE_API_KEY is set in .env and the PDFs folder contains PDF files."
 
 
 def create_demo():
@@ -53,3 +73,7 @@ def create_demo():
 def launch(share=False, debug=True):
     demo = create_demo()
     demo.launch(share=share, debug=debug)
+
+
+if __name__ == "__main__":
+    launch()
